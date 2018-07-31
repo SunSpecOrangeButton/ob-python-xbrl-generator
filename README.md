@@ -1,0 +1,1 @@
+# ob-python-xbrl-generator
