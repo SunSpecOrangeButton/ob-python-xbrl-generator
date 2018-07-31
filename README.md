@@ -55,9 +55,9 @@ report.toJSONString()
 ```
 
 ## Reference documents:
-https://sunspec.org/wp-content/uploads/2017/10/OrangeButtonTaxonomyGuide4.pdf
-https://yeti1.corefiling.com/yeti/resources/yeti-gwt/Yeti.jsp#tax~(id~103*v~146)!con~(id~904236)!net~(a~1653*l~451)!lang~(code~en-us)!path~(g~28464*p~0)!rg~(rg~22*p~11)
-https://xbrl.us/xbrl-taxonomy/2018-solar/
-https://en.wikipedia.org/wiki/XBRL
-http://frux.wikispaces.com/file/view/Chapter-14-UnderstandingAndUsingXBRLDimensions.pdf
-http://www.xbrl.org/specification/dimensions/rec-2012-01-25/dimensions-rec-2006-09-18+corrected-errata-2012-01-25-clean.html
+* https://sunspec.org/wp-content/uploads/2017/10/OrangeButtonTaxonomyGuide4.pdf
+* https://yeti1.corefiling.com/yeti/resources/yeti-gwt/Yeti.jsp#tax~(id~103*v~146)!con~(id~904236)!net~(a~1653*l~451)!lang~(code~en-us)!path~(g~28464*p~0)!rg~(rg~22*p~11)
+* https://xbrl.us/xbrl-taxonomy/2018-solar/
+* https://en.wikipedia.org/wiki/XBRL
+* http://frux.wikispaces.com/file/view/Chapter-14-UnderstandingAndUsingXBRLDimensions.pdf
+* http://www.xbrl.org/specification/dimensions/rec-2012-01-25/dimensions-rec-2006-09-18+corrected-errata-2012-01-25-clean.html
