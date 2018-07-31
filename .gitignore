@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# User's copy of config file, should not be version controlled
+orange_config.py
