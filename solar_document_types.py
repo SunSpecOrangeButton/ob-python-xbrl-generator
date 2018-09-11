@@ -46,6 +46,11 @@ class AbstractSolarXBRLInstance(AbstractXBRLInstance):
 
 
 class SystemInstallationSheet(AbstractSolarXBRLInstance):
+    """
+    A document type containing metadata for one or more systems, each
+    system located at a site and comprising one or more arrays.
+    """
+
     def __init__(self, unit_map, concept_map, entity_name="A Company"):
         super(SystemInstallationSheet, self).__init__(entity_name)
         self.systems = {} # keyed by system id
@@ -114,54 +119,60 @@ class SystemInstallationSheet(AbstractSolarXBRLInstance):
         # (what's DeviceListing table? how's that different from ProductIdentifierTable?)
 
         for system_identifier, systemData in self.systems.items():
-            for array_num, array_data in enumerate( self.arrays[system_identifier]):
-                # Array tilt and azimuth go in the SolarArrayTable:
-                arrayContext = self.getContext(
-                    "SolarArrayTable",
-                    instant = report_generation_date,
-                    extra_dimensions={
-                        "PVSystemIdentifierAxis": system_identifier,
-                        "SolarSubArrayIdentifierAxis": array_num,
-                        "EquipmentTypeAxis": "ModuleMember"
-                })
-                # Array make, model, and capacity go in ProductIdentifierTable:
-                productContext = self.getContext(
-                    "ProductIdentifierTable",
-                    extra_dimensions={
-                        "PVSystemIdentifierAxis": system_identifier,
-                        # TODO: come up with a better product ID here
-                        "ProductIdentifierAxis": "array_product_%d" % array_num,
-                        "TestConditionAxis": "StandardTestConditionMember"
+            if system_identifier in self.arrays:
+                for array_num, array_data in enumerate( self.arrays[system_identifier]):
+                    # Array tilt and azimuth go in the SolarArrayTable:
+                    arrayContext = self.getContext(
+                        "SolarArrayTable",
+                        instant = report_generation_date,
+                        extra_dimensions={
+                            "PVSystemIdentifierAxis": system_identifier,
+                            "SolarSubArrayIdentifierAxis": array_num,
+                            "EquipmentTypeAxis": "ModuleMember"
                     })
+                    # Array make, model, and capacity go in ProductIdentifierTable:
+                    productContext = self.getContext(
+                        "ProductIdentifierTable",
+                        extra_dimensions={
+                            "PVSystemIdentifierAxis": system_identifier,
+                            # TODO: come up with a better product ID here
+                            "ProductIdentifierAxis": "array_product_%d" % array_num,
+                            "TestConditionAxis": "StandardTestConditionMember"
+                        })
 
-                for fieldName in array_data:
-                    if fieldName in ["OrientationTilt", "OrientationAzimuth"]:
-                        context = arrayContext
-                    else:
-                        context = productContext
-                    facts.append(Fact(fieldName,
-                                      context,
-                                      self.lookUpUnit(fieldName),
-                                      array_data[fieldName]))
-                    # could also add a fact that "TypeOfDevice" = "ModuleMember"
+                    for fieldName in array_data:
+                        if fieldName in ["OrientationTilt", "OrientationAzimuth"]:
+                            context = arrayContext
+                        else:
+                            context = productContext
+                        facts.append(Fact(fieldName,
+                                        context,
+                                        self.lookUpUnit(fieldName),
+                                        array_data[fieldName]))
+                        # could also add a fact that "TypeOfDevice" = "ModuleMember"
+            else:
+                print "Warning: No array data for {}".format(system_identifier)
 
             # Inverter make, model, and capacity go in ProductIdentifierTable:
-            for inv_num, inverter_data in enumerate(self.inverters[system_identifier]):
-                inverterContext = self.getContext(
-                    "ProductIdentifierTable",
-                    extra_dimensions={
-                        "PVSystemIdentifierAxis": system_identifier,
-                        # TODO: come up with a better product ID here
-                        "ProductIdentifierAxis": "inverter_product_%d" % inv_num,
-                        "TestConditionAxis": "StandardTestConditionMember"
-                    })
+            if system_identifier in self.inverters:
+                for inv_num, inverter_data in enumerate(self.inverters[system_identifier]):
+                    inverterContext = self.getContext(
+                        "ProductIdentifierTable",
+                        extra_dimensions={
+                            "PVSystemIdentifierAxis": system_identifier,
+                            # TODO: come up with a better product ID here
+                            "ProductIdentifierAxis": "inverter_product_%d" % inv_num,
+                            "TestConditionAxis": "StandardTestConditionMember"
+                        })
 
-                for fieldName in inverter_data:
-                    facts.append(Fact(fieldName,
-                                      inverterContext,
-                                      self.lookUpUnit(fieldName),
-                                      inverter_data[fieldName]))
-                # could also add a fact that "TypeOfDevice" = "InverterMember"
+                    for fieldName in inverter_data:
+                        facts.append(Fact(fieldName,
+                                        inverterContext,
+                                        self.lookUpUnit(fieldName),
+                                        inverter_data[fieldName]))
+                    # could also add a fact that "TypeOfDevice" = "InverterMember"
+            else:
+                print "Warning: No inverter data for {}".format(system_identifier)
 
             # Latitude and Longitude go in the SiteIdentifierTable:
             siteId = "site for {}".format(system_identifier)
@@ -202,6 +213,12 @@ class SystemInstallationSheet(AbstractSolarXBRLInstance):
 
 
 class MonthlyOperatingReport(AbstractSolarXBRLInstance):
+    """
+    A very simple example document type which lists monthly
+    energy production (actualkwh) versus energy expectation
+    (expectedkwh) for one or more systems for one or more months.
+    """
+    # TODO use "100825 - Documents - Monthly Operating Report" ?
     def __init__(self, entity_name="A Company"):
         super(MonthlyOperatingReport, self).__init__(entity_name)
         self._data = []

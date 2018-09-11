@@ -13,3 +13,4 @@
 # limitations under the License.
 
 from solar_document_types import SystemInstallationSheet, MonthlyOperatingReport
+from unit_map import UNIT_MAP
