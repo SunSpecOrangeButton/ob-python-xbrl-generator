@@ -38,7 +38,8 @@ class AbstractSolarXBRLInstance(AbstractXBRLInstance):
             "SolarSubArrayIdentifierAxis": "SolarSubArrayIdentifierDomain",
             "SiteIdentifierAxis": "SiteIdentifierDomain",
             "ProductIdentifierAxis": "ProductIdentifierDomain",
-            "PVSystemIdentifierAxis": "PVSystemIdentifierDomain"
+            "PVSystemIdentifierAxis": "PVSystemIdentifierDomain",
+            "PeriodAxis": "PeriodDomain" # This is an enum type, does it belong here?
             }
 
     def getNamespacePrefix(self):
@@ -57,6 +58,7 @@ class SystemInstallationSheet(AbstractSolarXBRLInstance):
         self.arrays = {}
         self.inverters = {}
         self.sites = {}
+        self.seasonal_extras = {}
         self.required_units = []
         self.unit_map = unit_map
         self.concept_map = concept_map
@@ -100,6 +102,16 @@ class SystemInstallationSheet(AbstractSolarXBRLInstance):
             if not key in self.concept_map:
                 raise Exception("System got unknown fact name {}".format(key))
         self.sites[systemid] = self.convertNames(facts)
+
+    def addSeasonalData(self, systemid, fieldName, values):
+        # Values should be an array of 12 values.
+
+        # Would it make more sense to turn things into facts as they're added?
+
+        if not systemid in self.seasonal_extras:
+            self.seasonal_extras[systemid] = {}
+        self.seasonal_extras[systemid][fieldName] = values
+
 
     def get_required_units(self):
         return self.required_units
@@ -173,6 +185,41 @@ class SystemInstallationSheet(AbstractSolarXBRLInstance):
                     # could also add a fact that "TypeOfDevice" = "InverterMember"
             else:
                 print "Warning: No inverter data for {}".format(system_identifier)
+
+            # Seasonal data fields (such as monthly array shading, monthly
+            # estimated production, etc.) go into
+            # SystemProductionTable  with PVSystemIdentifierAxis and
+            # PeriodAxis which is PeriodDomain which has enumerated values:
+            # PeriodMonthJanuaryMember, PeriodMonthFebruaryMember etc.
+
+            if system_identifier in self.seasonal_extras:
+                seasonal = self.seasonal_extras[system_identifier]
+                for concept, monthly_values in seasonal.items():
+                    for month_number, value in enumerate(monthly_values):
+                        month_name_enum = ["PeriodMonthJanuaryMember",
+                                           "PeriodMonthFebruaryMember",
+                                           "PeriodMonthMarchMember",
+                                           "PeriodMonthAprilMember",
+                                           "PeriodMonthMayMember",
+                                           "PeriodMonthJuneMember",
+                                           "PeriodMonthJulyMember",
+                                           "PeriodMonthAugustMember",
+                                           "PeriodMonthSeptemberMember",
+                                           "PeriodMonthOctoberMember",
+                                           "PeriodMonthNovemberMember",
+                                           "PeriodMonthDecemberMember"]
+                        monthly_context = self.getContext(
+                            "SystemProductionTable",
+                            extra_dimensions = {
+                                "PVSystemIdentifierAxis": system_identifier,
+                                "PeriodAxis": month_name_enum[month_number]
+                            })
+                            # TODO should these be "period: forever" or some other
+                            # timeframe?
+                        facts.append(Fact(concept,
+                                          monthly_context,
+                                          self.lookUpUnit(concept),
+                                          value))
 
             # Latitude and Longitude go in the SiteIdentifierTable:
             siteId = "site for {}".format(system_identifier)
@@ -266,3 +313,5 @@ class MonthlyOperatingReport(AbstractSolarXBRLInstance):
                               record["expectedkwh"]))
         return facts
 
+# TODO: Add clases for FinancialTransaction, FinancialMetadata, and Aging reports.
+# 

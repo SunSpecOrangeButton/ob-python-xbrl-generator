@@ -27,4 +27,7 @@ UNIT_MAP = {"OrientationTilt": "degrees",
             "DesignAttributePVACCapacity": "kW",
             "OrientationTilt": "degrees",
             "OrientationAzimuth": "degrees",
-            "EquipmentTypeNumber": "pure"}
+            "EquipmentTypeNumber": "pure",
+            "PredictedEnergyAtTheRevenueMeterForPeriod": "kWh",
+            "ShadingModelFactorTMMPercent": "percent" #???
+}
